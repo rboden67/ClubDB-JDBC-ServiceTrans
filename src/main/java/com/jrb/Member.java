@@ -1,6 +1,7 @@
 package com.jrb;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -150,9 +151,10 @@ public class Member {
 		return false;
 	}
 	public void renew() {
-		int yr = this.expdt.getYear(); //fixme
-		yr++;
-		
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(this.expdt);
+		calendar.add(Calendar.YEAR, 1);
+		this.expdt = calendar.getTime();
 	}
 
 	public String toString() {

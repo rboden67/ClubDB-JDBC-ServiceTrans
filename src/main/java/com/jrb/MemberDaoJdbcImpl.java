@@ -10,8 +10,6 @@ import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.object.MappingSqlQuery;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 
 public class MemberDaoJdbcImpl implements MemberDao {
 
@@ -37,7 +35,7 @@ public class MemberDaoJdbcImpl implements MemberDao {
 				new Object[] { member.getMemid(), member.getLastname(), member.getFirstname(), member.getMiddlename(),
 						member.getStatus(), member.getMemdt(), member.getPassword() }));
 		if (count != 1)
-			throw new InsertFailedException("Cannot insert member");
+			throw new UpdateFailedException("Cannot insert member");
 	}
 
 	public void updateMember(Member member) {
@@ -48,18 +46,33 @@ public class MemberDaoJdbcImpl implements MemberDao {
 					member.getLastname(), member.getFirstname(), member.getMiddlename(), member.getStatus(),
 					member.getMemdt(), member.getExpdt(), member.getPassword(), member.getMemid());
 			if (count != 1) {
-				throw new UpdateFailedException("No member update for " + member.getMemid() + 
-													" count = " + count);
+				throw new UpdateFailedException("No member update for " + member.getMemid() + " count = " + count);
 			}
 		} catch (Exception e) {
 			throw new UpdateFailedException(e.getMessage());
 		}
 	}
 
+	public void addDuesPurchase(String memid, String purchasedt, String success) {
+		int count;
+		PreparedStatementCreatorFactory psCreatorFactory = new PreparedStatementCreatorFactory(
+				"insert into tblPurchases (MemId, PurchaseDt, TransType, TransCd, Amount) values(?,?,?,?,?)",
+				new int[] { Types.CHAR, Types.DATE, Types.CHAR, Types.CHAR, Types.DOUBLE });
+		if (success.compareToIgnoreCase("Y") == 0) {
+			count = jdbcTemplate.update(
+					psCreatorFactory.newPreparedStatementCreator(new Object[] { memid, purchasedt, "D", "01", 100 }));
+		} else {
+			count = jdbcTemplate.update(psCreatorFactory
+					.newPreparedStatementCreator(new Object[] { memid, purchasedt, "D", "01", "BAD DATA" }));
+		}
+		if (count != 1)
+			throw new UpdateFailedException("Dues insert failed");
+	}
+
 	public void delete(String memid) {
 		int count = jdbcTemplate.update("delete from tblMembers where MemId = ?", memid);
 		if (count != 1)
-			throw new DeleteFailedException("Cannot delete account");
+			throw new UpdateFailedException("Cannot delete account");
 	}
 
 	public Member find(String memid) {

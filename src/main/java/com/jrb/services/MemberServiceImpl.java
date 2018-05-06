@@ -45,11 +45,11 @@ public class MemberServiceImpl implements MemberService {
 		try {
 			Member m = memberDao.find(memid);
 			//renew exp date
-			//m.renew();
+			m.renew();
 			memberDao.updateMember(m);
 			
 			//create purchase for dues renewal
-			//call memberDao.addDuesPurchase();
+			memberDao.addDuesPurchase(memid, "2018-05-01", success);
 			
 		} catch (Exception e) {
 			throw new UpdateFailedException("Update fail for " + memid + " " + e.getMessage());
