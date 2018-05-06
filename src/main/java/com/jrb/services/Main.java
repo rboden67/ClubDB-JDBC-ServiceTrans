@@ -35,5 +35,4 @@ public class Main {
 		sc.close();
 		applicationContext.close();
 	}
-
 }
